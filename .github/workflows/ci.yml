@@ -11,6 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v2
+        with:
+          version: 8.12.0
       - uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -23,10 +25,12 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v2
+        with:
+          version: 8.12.0
       - uses: actions/setup-node@v4
         with:
           node-version: 18
