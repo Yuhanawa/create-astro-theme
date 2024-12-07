@@ -1,6 +1,6 @@
 {
   "name": "create-astro-theme",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "CLI tool for creating Astro themes with best practices and modern development setup",
   "type": "module",
   "main": "./dist/index.js",
