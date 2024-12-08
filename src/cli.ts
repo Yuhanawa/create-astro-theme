@@ -1,70 +1,92 @@
 #!/usr/bin/env node
 
-import fs from "node:fs";
 import path from "node:path";
-import { cancel, confirm, group, intro, multiselect, outro, select, text } from "@clack/prompts";
+import { cancel, confirm, intro, outro, spinner } from "@clack/prompts";
+import { log } from "@clack/prompts";
 import chalk from "chalk";
 import { Command } from "commander";
 import packageJson from "../package.json";
+import * as action from "./actions";
+import { kebabCase } from "./utils/case";
+import exec from "./utils/exec";
+import * as fs from "./utils/fs-wrapper";
+import * as p from "./utils/prompts";
 
 const program = new Command();
 
 program
-  .name("create-astro-theme")
-  .version(packageJson.version)
-  .description("A CLI tool to bootstrap your project")
-  .action(async () => {
-    console.log(chalk.green("Welcome to Create Astro Theme!"));
+	.name("create-astro-theme")
+	.version(packageJson.version)
+	.description("A CLI tool to bootstrap your project")
+	// .option("-y, --yes", "Skip prompts and use default values")
+	.option("--dry-run", "Show what would be done, but don't actually do it")
+	.action(async (options) => {
+		const { dryRun } = options;
+		// biome-ignore lint/suspicious: globalThis
+		((globalThis as any).dryRun = (dryRun as boolean) ?? false) &&
+			log.info(chalk.green("🚀 Dry Run: Run through without making any changes"));
 
-    intro("Create Theme With Astro Theme Provider");
+		log.info("");
+		intro("Create Astro Theme With Astro Theme Provider");
 
-    // find out package.json in the current directory
-    const inProject = fs.existsSync(path.join(process.cwd(), "package.json"));
+		const inProject = fs.existsSync(path.join(process.cwd(), "package.json"));
+		const actionType = await p.actionType(inProject);
 
-    const actionType = await select({
-      message: "What do you want to do?",
-      options: [
-        {
-          value: "project",
-          label: "new project and theme",
-          hint: `with Astro Theme Provider ${!inProject ? "(recommended)" : ""}`,
-        },
-        {
-          value: "theme",
-          label: "new theme",
-          hint: `in this project${inProject ? "(recommended)" : "(or directory)"}`,
-        },
-        { value: 'install', label: 'I just want to create a website with my favorite theme' },
-      ],
-      initialValue: inProject ? "theme" : "project",
-    });
+		if (!inProject && actionType === "theme") {
+			const shouldContinue = await confirm({
+				message:
+					"It looks like you're not in a project, you might want to create a `new project and theme with Astro Theme Provider`, Are you sure continue to create a theme in this directory?",
+			});
+			if (!shouldContinue) cancel();
+		}
 
-    if (!inProject && actionType === "theme") {
-      const shouldContinue = await confirm({
-        message:
-          "It looks like you're not in a project, you might want to create a `new project and theme with Astro Theme Provider`, Are you sure continue to create a theme in this directory?",
-      });
-      if (!shouldContinue) cancel();
-    }
+		const hasPackageOrPlayground =
+			fs.existsSync(path.join(process.cwd(), "package")) || fs.existsSync(path.join(process.cwd(), "playground"));
+		const themeName = (await p.themeName()).toString().trim().replace(/\s/g, "-");
+		const structure = await p.structure(inProject, hasPackageOrPlayground);
+		const npm = await p.npm();
+		const initGit = actionType === "project" ? await p.initGit() : false;
+		const installDependencies = await p.installDependencies();
 
-    if (actionType === "project") {
-      /* 
-      theme name
+		const s = spinner();
 
-      npm
-      Use Typescript
-      Install Modules
-      */
-    }
+		let projectPath: string;
 
-    if (actionType === "project" || actionType === "theme") {
-      /* 
-      theme name
-      Install Modules
-      */
-    }
+		if (actionType === "project") {
+			let projectName = `${themeName}-root`;
+			if (structure === "single")
+				log.info(`We will use ${projectName} as the project name and use ${themeName} as the theme name`);
+			else if (structure === "multi" || structure === "single-playground")
+				projectName = (await p.projectName(projectName)).toString().trim();
 
-    outro("No Future Be Implementation, I Will Finish It In The Future, But Now, I Want Eat And Sleep");
-  });
+			s.start("Initializing project...");
+
+			const projectNameKebabCase = kebabCase(projectName);
+			action.initProject(process.cwd(), projectNameKebabCase);
+
+			projectPath = path.join(process.cwd(), projectNameKebabCase);
+		} else if (actionType === "theme") {
+			s.start("Initializing theme...");
+
+			projectPath = path.join(process.cwd());
+		} else throw new Error("Unknown action type"); // could not happen
+
+		const themeNameKebabCase = kebabCase(themeName);
+		const themeDir = structure === "single" ? "package" : `${themeNameKebabCase}-package`; // structure === "single" only happens when actionType === "project"
+		const playgroundName = structure === "multi" ? `${themeNameKebabCase}-playground` : "playground";
+
+		action.initTheme(projectPath, themeDir, themeName, playgroundName, npm.toString());
+
+		if (initGit) action.initGit(projectPath.toString());
+		if (installDependencies) {
+			s.message("Installing dependencies...");
+			exec(`${npm.toString()} install`, { cwd: projectPath });
+		}
+
+		s.stop("Initialization complete!");
+		log.info("");
+
+		outro("Done!");
+	});
 
 program.parse(process.argv);
