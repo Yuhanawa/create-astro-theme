@@ -11,6 +11,9 @@ yarn create astro-theme@latest
 ```
 
 
+https://github.com/user-attachments/assets/a8632bd1-41d4-4fe0-8100-0d20fcf1900e
+
+
 ## TODO
 
 ### CLI
