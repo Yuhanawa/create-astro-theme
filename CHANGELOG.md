@@ -1,5 +1,11 @@
 # create-astro-theme
 
+## 0.1.1
+
+### Patch Changes
+
+- ee66612: fix: publish
+
 ## 0.1.0
 
 ### Minor Changes
