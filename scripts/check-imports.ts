@@ -23,15 +23,10 @@ function checkFile(filePath: string): void {
 
 function walkDir(dir: string): void {
 	const files = readdirSync(dir, { withFileTypes: true });
-
 	for (const file of files) {
 		const path = join(dir, file.name);
-
-		if (file.isDirectory()) {
-			walkDir(path);
-		} else if (file.name.endsWith(".ts") || file.name.endsWith(".js")) {
-			checkFile(path);
-		}
+		if (file.isDirectory()) walkDir(path);
+		else if (file.name.endsWith(".ts") || file.name.endsWith(".js")) checkFile(path);
 	}
 }
 
