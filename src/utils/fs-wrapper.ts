@@ -4,13 +4,19 @@ import { log } from "@clack/prompts";
 // biome-ignore lint/suspicious/noExplicitAny: globalThis
 const dryRun = () => (globalThis as any).dryRun ?? false;
 
-// biome-ignore lint/suspicious/noExplicitAny: allowed
-export const mkdirSync = (path: string, ...args: any[]) => {
+export const mkdirSync = (path: string, options: fs.MakeDirectoryOptions = { recursive: true }) => {
 	if (dryRun()) {
 		log.info(`[DryRun] create directory: ${path}`);
 		return;
 	}
-	fs.mkdirSync(path, ...args);
+	try {
+		fs.mkdirSync(path, options);
+		// biome-ignore lint/suspicious/noExplicitAny: allowed any type error
+	} catch (error: any) {
+		log.error(`❌ Failed to create directory: ${path}`);
+		log.error(error);
+		throw error;
+	}
 };
 
 export const writeFileSync = (
@@ -26,7 +32,14 @@ export const writeFileSync = (
 		}
 		return;
 	}
-	fs.writeFileSync(file, data, options);
+	try {
+		fs.writeFileSync(file, data, options);
+		// biome-ignore lint/suspicious/noExplicitAny: allowed any type error
+	} catch (error: any) {
+		log.error(`❌ Failed to write file: ${file}`);
+		log.error(error);
+		throw error;
+	}
 };
 
 export const copyFileSync = (src: fs.PathLike, dest: fs.PathLike, mode?: number) => {
@@ -34,7 +47,14 @@ export const copyFileSync = (src: fs.PathLike, dest: fs.PathLike, mode?: number)
 		log.info(`[DryRun] copy file from ${src} to ${dest}`);
 		return;
 	}
-	fs.copyFileSync(src, dest, mode);
+	try {
+		fs.copyFileSync(src, dest, mode);
+		// biome-ignore lint/suspicious/noExplicitAny:  allowed any type error
+	} catch (error: any) {
+		log.error(`❌ Failed to copy file from ${src} to ${dest}`);
+		log.error(error);
+		throw error;
+	}
 };
 
 export {

@@ -1,4 +1,4 @@
-import { cancel, confirm, group, intro, isCancel, multiselect, outro, select, text } from "@clack/prompts";
+import { cancel, confirm, isCancel, select, text } from "@clack/prompts";
 
 // I hate this
 // It could have used "group" instead, but by the time I realized that, it was too late, I had already written
@@ -28,10 +28,10 @@ export const installDependencies = () =>
 export const npm = () =>
 	c(
 		select({
-			message: "Use NPM?",
+			message: "Use PNPM? (sorry, we only support PNPM for now)",
 			options: [
 				{ value: "pnpm", label: "PNPM", hint: "(recommended)" },
-				{ value: "npm", label: "NPM" },
+				// { value: "npm", label: "NPM" },
 			],
 			initialValue: "pnpm",
 		}),
@@ -82,7 +82,15 @@ export const projectName = (defaultValue: string) =>
 		}),
 	);
 
-export const structure = (inProject: boolean, hasPackageOrPlayground: boolean) =>
+export const structure = (
+	themeNameKebabCase: string,
+	{
+		inProject,
+		hasPackageOrPlayground,
+		packageIsProject,
+		playgroundIsProject,
+	}: { inProject: boolean; hasPackageOrPlayground: boolean; packageIsProject: boolean; playgroundIsProject: boolean },
+) =>
 	c(
 		select({
 			message: "Structure: ",
@@ -92,17 +100,29 @@ export const structure = (inProject: boolean, hasPackageOrPlayground: boolean) =
 					label: "package + playground (recommended)",
 					hint: "applicable to projects with only a single theme",
 				},
+				!packageIsProject &&
+					!playgroundIsProject && {
+						value: "multi-in-subdir",
+						label: `package/${themeNameKebabCase} + playground/${themeNameKebabCase} (recommended)`,
+						hint: "applicable to projects with multiple themes",
+					},
 				{
-					value: "multi",
-					label: "theme-package + theme-playground (recommended)",
+					value: "multi-in-root",
+					label: `${themeNameKebabCase}-package + ${themeNameKebabCase}-playground ${
+						packageIsProject || playgroundIsProject ? "(recommended)" : ""
+					}`,
 					hint: "applicable to projects with multiple themes",
 				},
 				{
 					value: "single-playground",
-					label: "theme-package + playground",
+					label: `${themeNameKebabCase}-package + playground`,
 					hint: "applicable to minimal themes with only a single playground",
 				},
 			].filter((i) => !!i),
-			initialValue: inProject ? "multi" : "single",
+			initialValue: hasPackageOrPlayground
+				? !packageIsProject && !playgroundIsProject
+					? "multi-in-subdir"
+					: "multi-in-root"
+				: "single",
 		}),
 	);
