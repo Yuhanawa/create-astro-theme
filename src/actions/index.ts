@@ -1,9 +1,9 @@
 import { join } from "node:path";
 import { log } from "@clack/prompts";
 import * as yaml from "yaml";
-import * as fs from "./../utils/fs-wrapper";
 import exec from "../utils/exec";
 import { copyTemplateWithReplacements, createDirStructure } from "../utils/template";
+import * as fs from "./../utils/fs-wrapper";
 
 export function initGit(path: string) {
 	exec("git init", { cwd: path });

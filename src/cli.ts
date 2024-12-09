@@ -4,12 +4,12 @@ import path from "node:path";
 import { cancel, confirm, intro, log, outro, spinner } from "@clack/prompts";
 import chalk from "chalk";
 import { Command } from "commander";
+import packageJson from "../package.json";
+import * as action from "./actions";
 import { kebabCase } from "./utils/case";
 import exec from "./utils/exec";
 import * as fs from "./utils/fs-wrapper";
 import * as p from "./utils/prompts";
-import * as action from "./actions";
-import packageJson from "../package.json";
 
 const program = new Command();
 
