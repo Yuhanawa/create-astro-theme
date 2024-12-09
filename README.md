@@ -19,14 +19,16 @@ https://github.com/user-attachments/assets/a8632bd1-41d4-4fe0-8100-0d20fcf1900e
 ### CLI
 
 - [ ] support js
-- [ ] create package in `package/` and playground in `playground/`
+- [ ] support npm and yarn (only pnpm is supported now)
+- [x] create package in `package/` and playground in `playground/`
 - [ ] add options
+  - [x] --dry-run
   - [ ] -y --yes
   - [ ] --template
   - [ ] --theme
   - [ ] --structure
-  - [ ] --install --no-install
-  - [ ] --git --no-git
+  - [x] --install --no-install
+  - [x] --git --no-git
 
 ### LIB
 
