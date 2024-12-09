@@ -109,4 +109,36 @@ program
 		outro("Done!");
 	});
 
+program
+	.command("with-theme <themeName> [websiteName]")
+	.option("--git", "Initialize a git repository")
+	.option("--install-dependencies", "Install dependencies")
+	.option("--dry-run", "Show what would be done, but don't actually do it")
+	.action(async (themeName, websiteName, options) => {
+		intro("Create website with your favorite theme");
+		// biome-ignore lint:
+		((globalThis as any).dryRun = (options.dryRun as boolean) ?? false) &&
+			log.info(chalk.green("🚀 Dry Run: Run through without making any changes"));
+		// biome-ignore lint:
+		websiteName ??= (await p.websiteName()).toString().trim().replace(/\s/g, "-");
+		const git = options.git ?? (await p.initGit());
+		const installDependencies = options.installDependencies ?? (await p.installDependencies());
+		const command = [
+			"pnpm create astro@latest",
+			websiteName,
+			"--template minimal",
+			`--add ${themeName}`,
+			"--skip-houston",
+			git ? "--git" : "",
+			installDependencies ? "--install-dependencies" : "",
+			"-y",
+		]
+			.filter(Boolean)
+			.join(" ");
+
+		exec(command);
+
+		outro("Done!");
+	});
+
 program.parse(process.argv);

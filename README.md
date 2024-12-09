@@ -1,5 +1,7 @@
 # create-astro-theme
 
+## CLI
+
 This is a CLI tool for creating Astro theme with [Astro Theme Provider](https://github.com/astrolicious/astro-theme-provider)
 
 ```bash
@@ -10,13 +12,54 @@ pnpm create astro-theme@latest
 yarn create astro-theme@latest
 ```
 
-
 https://github.com/user-attachments/assets/a8632bd1-41d4-4fe0-8100-0d20fcf1900e
 
+### LIB
+
+A library for theme author to provide a CLI tool to theme users
+
+it's like this
+
+#### for author
+
+
+A library for theme author to provide a CLI tool to theme users
+
+```ts
+initConfig(
+	packageName,
+	configSchema,
+	defaultConfigs: {
+		minimal: {
+            //..
+            // auto or manual
+        };
+		recommended: {
+            //..
+            // manual
+        };
+		// [key: string]: configType;
+	},
+	// options?: {
+	// 	dryRun?: boolean;
+	// 	cwd?: string;
+	// }
+)
+```
+
+#### for user (Untested, may contain bugs)
+
+- from zero to create website with their favorite theme
+
+```bash
+npm create astro-theme@latest with-theme theme-name
+```
+
+```bash
+pnpm theme-name init
+```
 
 ## TODO
-
-### CLI
 
 - [ ] support js
 - [ ] support npm and yarn (only pnpm is supported now)
@@ -29,44 +72,4 @@ https://github.com/user-attachments/assets/a8632bd1-41d4-4fe0-8100-0d20fcf1900e
   - [ ] --structure
   - [x] --install --no-install
   - [x] --git --no-git
-
-### LIB
-
-A library for theme author to provide a CLI tool to theme users
-
-it's like this
-
-#### for author
-
-```ts
-initConfig(ConfigSchema,
-    {
-        minimal:{
-            //..
-            // auto or manual
-        }
-        recommended:{
-            //..
-            // manual
-        }
-        much:{
-            //..
-            // auto, as possible as much
-        }
-    },
-)
-
-```
-
-#### for user
-
-- from zero to create website with their favorite theme
-```bash
-npm create astro-theme@latest --theme theme-name
-```
-it will create a astro project, install the theme, and run `pnpm theme-name init --template recommended`
-
-- already have a project with theme, want to add minimal config in `astro.config.ts`
-```bash
-pnpm theme-name init --template minimal
-```
+- [ ] cli example

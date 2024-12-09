@@ -51,9 +51,22 @@ export const actionType = (inProject: boolean) =>
 					label: `new theme ${inProject ? "(recommended)" : ""}`,
 					hint: `in this project ${inProject ? "" : "or directory"}`,
 				},
-				// { value: "install", label: "I just want to create a website with my favorite theme" },
+				{ value: "create", label: "I just want to create a website with my favorite theme" },
 			],
 			initialValue: inProject ? "theme" : "project",
+		}),
+	);
+
+export const websiteName = () =>
+	c(
+		text({
+			message: "Website Name: ",
+			placeholder: "my-astro-website",
+			defaultValue: "my-astro-website",
+			validate: (websiteName) => {
+				if (websiteName.match(/[^\w\d\s\-_]/g))
+					return "Website name can only contain letters, numbers, hyphens, and underscores, spaces will be replaced with hyphens";
+			},
 		}),
 	);
 
