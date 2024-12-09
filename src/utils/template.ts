@@ -10,6 +10,8 @@ export function copyTemplateWithReplacements(
 	const allReplacements = getAllCase(replacements);
 
 	const copyFile = (src: string, dest: string) => {
+		const dirPath = path.dirname(dest);
+		if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
 		// biome-ignore format: common ext list
 		if ([".js", ".ts", ".cjs", ".cts",".mjs", ".mts", ".jsx", ".tsx", ".json", ".jsonc", ".json5", ".md", ".mdx", ".txt", ".xml", ".yml", ".yaml", ".html", ".css", ".scss", ".less", ".astro", ".vue", ".svelte"]
 			.some(ext => path.extname(src).toLowerCase() === ext)) {
@@ -17,12 +19,8 @@ export function copyTemplateWithReplacements(
 			let replacedContent = content;
 			for (const [key, value] of Object.entries(allReplacements))
 				replacedContent = replacedContent.replace(new RegExp(`{{${key}}}`, "g"), value);
-			const dirPath = path.dirname(dest);
-			if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
 			fs.writeFileSync(dest, replacedContent);
-		} else {
-			fs.copyFileSync(src, dest);
-		}
+		} else fs.copyFileSync(src, dest);
 	};
 
 	const copyAllFiles = (dirPath: string) => {
