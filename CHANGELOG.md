@@ -1,5 +1,11 @@
 # create-astro-theme
 
+## 0.3.0
+
+### Minor Changes
+
+- a8563e4: feat: add initConfig function and cli
+
 ## 0.2.0
 
 ### Minor Changes
