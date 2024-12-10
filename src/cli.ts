@@ -1,32 +1,28 @@
 #!/usr/bin/env node
 
-import path from "node:path";
+import path, { join } from "node:path";
 import { cancel, confirm, intro, log, outro, spinner } from "@clack/prompts";
+import { cac } from "cac";
 import chalk from "chalk";
-import { Command } from "commander";
 import packageJson from "../package.json";
 import * as action from "./actions";
+import initConfig from "./actions/initConfig";
 import { kebabCase } from "./utils/case";
+import { setDryRun } from "./utils/dryRun";
 import exec from "./utils/exec";
 import * as fs from "./utils/fs-wrapper";
 import * as p from "./utils/prompts";
 
-const program = new Command();
+const cli = cac("create-astro-theme");
+cli.version(packageJson.version);
+cli.option("--dry-run", "Show what would be done, but don't actually do it");
 
-program
-	.name("create-astro-theme")
-	.version(packageJson.version)
-	.description("A CLI tool to bootstrap your project")
+cli
+	.command("", "Create a theme with Astro Theme Provider")
 	// .option("-y, --yes", "Skip prompts and use default values")
-	.option("--dry-run", "Show what would be done, but don't actually do it")
 	.option("--git", "Initialize a git repository")
 	.option("--install-dependencies", "Install dependencies")
 	.action(async (options) => {
-		// biome-ignore lint/suspicious: globalThis
-		((globalThis as any).dryRun = (options.dryRun as boolean) ?? false) &&
-			log.info(chalk.green("🚀 Dry Run: Run through without making any changes"));
-
-		log.info("");
 		intro("Create Astro Theme With Astro Theme Provider");
 
 		const inProject = fs.existsSync(path.join(process.cwd(), "package.json"));
@@ -109,18 +105,20 @@ program
 		outro("Done!");
 	});
 
-program
-	.command("with-theme <themeName> [websiteName]")
+cli
+	.command("with-theme <themeName> [websiteName]", "Create a website with your favorite theme")
 	.option("--git", "Initialize a git repository")
 	.option("--install-dependencies", "Install dependencies")
-	.option("--dry-run", "Show what would be done, but don't actually do it")
 	.action(async (themeName, websiteName, options) => {
 		intro("Create website with your favorite theme");
 		// biome-ignore lint:
-		((globalThis as any).dryRun = (options.dryRun as boolean) ?? false) &&
-			log.info(chalk.green("🚀 Dry Run: Run through without making any changes"));
-		// biome-ignore lint:
 		websiteName ??= (await p.websiteName()).toString().trim().replace(/\s/g, "-");
+		const projectPath = path.join(process.cwd(), websiteName);
+		if (fs.existsAndNotEmpty(projectPath)) {
+			log.error(`Directory ${websiteName} already exists and is not empty`);
+			process.exit(1);
+		}
+
 		const git = options.git ?? (await p.initGit());
 		const installDependencies = options.installDependencies ?? (await p.installDependencies());
 		const command = [
@@ -129,16 +127,78 @@ program
 			"--template minimal",
 			`--add ${themeName}`,
 			"--skip-houston",
-			git ? "--git" : "",
-			installDependencies ? "--install-dependencies" : "",
+			git && "--git",
+			installDependencies && "--install",
 			"-y",
 		]
 			.filter(Boolean)
 			.join(" ");
 
+		const s = spinner();
+		s.start(`Creating website ${websiteName} with theme ${themeName} ...`);
+		log.step(`Creating website ${websiteName} with theme ${themeName} ...`);
+
+		try {
+			const code = `import { init } from "${themeName}";init();`;
+			exec(`npx tsx -e "${code}"`, { cwd: websiteName });
+		} catch (error) {
+			console.warn(error);
+		}
+
 		exec(command);
+
+		s.stop("Website created!");
+
+		const modulePath = path.join(projectPath, "node_modules", themeName);
+		const initConfigPath = path.join(modulePath, "init.config.json");
+		if (fs.existsSync(initConfigPath)) {
+			log.info(`Theme ${themeName} has "init.config.json", would you like to initialize it?`);
+			const initConfigConfirm = await confirm({
+				message: "Initialize config? (recommended)",
+			});
+			if (initConfigConfirm) {
+				const initConfigString = fs.readFileSync(initConfigPath, "utf-8");
+				const initConfigJson = JSON.parse(initConfigString);
+				initConfig(themeName, initConfigJson, {
+					cwd: projectPath,
+				});
+			}
+		}
 
 		outro("Done!");
 	});
 
-program.parse(process.argv);
+cli
+	.command("init <packageName>", "Initialize a theme")
+	.option("--cwd <cwd>", "The current working directory")
+	.option("--yes", "Skip prompts and use default values")
+	.action(async (packageName, options) => {
+		const cwd = options.cwd ?? process.cwd();
+		const modulePath = path.join(cwd, "node_modules", packageName);
+		const initConfigPath = path.join(modulePath, "init.config.json");
+		if (!fs.existsSync(initConfigPath)) {
+			console.error(`Could not find init.config.json for ${packageName}`);
+			process.exit(1);
+		}
+		const initConfigString = fs.readFileSync(initConfigPath, "utf-8");
+		const initConfigJson = JSON.parse(initConfigString);
+		initConfig(packageName, initConfigJson, {
+			cwd,
+			useDefaultValues: options.yes,
+		});
+	});
+
+try {
+	const results = cli.parse(process.argv, { run: false });
+	setDryRun(results.options.dryRun) && log.info(chalk.green("🚀 Dry Run: Run through without making any changes"));
+	log.info("");
+	await cli.runMatchedCommand();
+} catch (error) {
+	log.error("❌ Something went wrong!");
+	console.error(error);
+	if (error instanceof Error) {
+		log.error(error.message);
+		console.error(error.stack);
+	}
+	process.exit(1);
+}

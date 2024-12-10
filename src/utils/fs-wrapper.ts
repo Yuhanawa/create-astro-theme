@@ -1,11 +1,9 @@
 import fs from "node:fs";
 import { log } from "@clack/prompts";
-
-// biome-ignore lint/suspicious/noExplicitAny: globalThis
-const dryRun = () => (globalThis as any).dryRun ?? false;
+import { getDryRun } from "./dryRun";
 
 export const mkdirSync = (path: string, options: fs.MakeDirectoryOptions = { recursive: true }) => {
-	if (dryRun()) {
+	if (getDryRun()) {
 		log.info(`[DryRun] create directory: ${path}`);
 		return;
 	}
@@ -24,7 +22,7 @@ export const writeFileSync = (
 	data: string | NodeJS.ArrayBufferView,
 	options?: fs.WriteFileOptions,
 ) => {
-	if (dryRun()) {
+	if (getDryRun()) {
 		if (["js", "ts", "json"].some((i) => file.toString().endsWith(i))) {
 			log.info(`[DryRun] write file: ${file}, data: ${data}`);
 		} else {
@@ -43,7 +41,7 @@ export const writeFileSync = (
 };
 
 export const copyFileSync = (src: fs.PathLike, dest: fs.PathLike, mode?: number) => {
-	if (dryRun()) {
+	if (getDryRun()) {
 		log.info(`[DryRun] copy file from ${src} to ${dest}`);
 		return;
 	}
@@ -56,6 +54,8 @@ export const copyFileSync = (src: fs.PathLike, dest: fs.PathLike, mode?: number)
 		throw error;
 	}
 };
+
+export const existsAndNotEmpty = (path: string) => fs.existsSync(path) && fs.readdirSync(path).length > 0;
 
 export {
 	readSync,

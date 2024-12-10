@@ -1,6 +1,7 @@
 import { join } from "node:path";
 import { log } from "@clack/prompts";
 import * as yaml from "yaml";
+import { getDryRun } from "../utils/dryRun";
 import exec from "../utils/exec";
 import { copyTemplateWithReplacements, createDirStructure } from "../utils/template";
 import * as fs from "./../utils/fs-wrapper";
@@ -12,7 +13,7 @@ export function initGit(path: string) {
 
 export function initProject(BasePath: string, projectNameKebab: string) {
 	const projectPath = join(BasePath, projectNameKebab);
-	if (fs.existsSync(projectPath) && fs.readdirSync(projectPath).length > 0) {
+	if (fs.existsAndNotEmpty(projectPath)) {
 		log.error(`Project ${projectNameKebab} already exists`);
 		process.exit(1);
 	}
@@ -41,8 +42,8 @@ export function initTheme(
 	useSubdir: boolean,
 ) {
 	// theme
-	const themePath = useSubdir ? join(projectPath, "package", themeDir) : join(projectPath, themeDir);
-	if (fs.existsSync(themePath) && fs.readdirSync(themePath).length > 0) {
+	const themePath = useSubdir ? join(projectPath, "packages", themeDir) : join(projectPath, themeDir);
+	if (fs.existsAndNotEmpty(themePath)) {
 		log.error(`Theme ${themeName} already exists`);
 		process.exit(1);
 	}
@@ -56,7 +57,7 @@ export function initTheme(
 
 	// playground
 	const playgroundPath = useSubdir
-		? join(projectPath, "playground", playgroundName)
+		? join(projectPath, "playgrounds", playgroundName)
 		: join(projectPath, playgroundName);
 	if (fs.existsSync(playgroundPath) && fs.readdirSync(playgroundPath).length > 0) {
 		log.info("Playground already exists, skipping creation");
@@ -83,9 +84,9 @@ export function initTheme(
 			const pnpmWorkspaceYaml = yaml.parse(fs.readFileSync(pnpmWorkspaceYamlPath, "utf-8"));
 			if (!pnpmWorkspaceYaml.packages) pnpmWorkspaceYaml.packages = [];
 			if (useSubdir) {
-				if (!["package/*", "package\\*"].some((p) => pnpmWorkspaceYaml.packages.includes(p)))
+				if (!["packages/*", "packages\\*"].some((p) => pnpmWorkspaceYaml.packages.includes(p)))
 					pnpmWorkspaceYaml.packages.push(`package/${themeDir}`);
-				if (!["playground/*", "playground\\*"].some((p) => pnpmWorkspaceYaml.packages.includes(p)))
+				if (!["playgrounds/*", "playgrounds\\*"].some((p) => pnpmWorkspaceYaml.packages.includes(p)))
 					pnpmWorkspaceYaml.packages.push(`playground/${playgroundName}`);
 			} else pnpmWorkspaceYaml.packages.push(themeDir, playgroundName);
 
@@ -95,14 +96,13 @@ export function initTheme(
 			fs.writeFileSync(
 				pnpmWorkspaceYamlPath,
 				yaml.stringify({
-					packages: useSubdir ? [`package/${themeDir}`, `playground/${playgroundName}`] : [themeDir, playgroundName],
+					packages: useSubdir ? [`packages/${themeDir}`, `playgrounds/${playgroundName}`] : [themeDir, playgroundName],
 				}),
 			);
 		}
 	}
-	// biome-ignore lint/suspicious/noExplicitAny: globalThis
-	const dryRun = (globalThis as any).dryRun ?? false;
-	if (dryRun) {
+
+	if (getDryRun()) {
 		log.info("[DryRun] [skip] read package.json and add script");
 	} else {
 		const packageExists = fs.existsSync(`${projectPath}/package.json`);

@@ -14,52 +14,43 @@ yarn create astro-theme@latest
 
 https://github.com/user-attachments/assets/a8632bd1-41d4-4fe0-8100-0d20fcf1900e
 
-### LIB
+## TODO:
 
-A library for theme author to provide a CLI tool to theme users
+- init config
+**already implemented, but not tested**
 
-it's like this
+init.config.json
 
-#### for author
-
-
-A library for theme author to provide a CLI tool to theme users
-
-```ts
-initConfig(
-	packageName,
-	configSchema,
-	defaultConfigs: {
-		minimal: {
-            //..
-            // auto or manual
-        };
-		recommended: {
-            //..
-            // manual
-        };
-		// [key: string]: configType;
-	},
-	// options?: {
-	// 	dryRun?: boolean;
-	// 	cwd?: string;
-	// }
-)
+```json
+{
+  "config": {
+    "object": {
+      // ...
+    }
+  }
+}
 ```
 
-#### for user (Untested, may contain bugs)
+when user run `npm create astro-theme@latest init theme-name`
+
+the content of object in `init.config.json` will be copied to `astro.config.ts`
 
 - from zero to create website with their favorite theme
+
+> has problem: `astro-theme-provider` seems that astro v5 is not supported
+> 
+> solution:
+> 
+> - create a template using astro v4
+> 
+> - let `astro-theme-provider` support v5
+> 
 
 ```bash
 npm create astro-theme@latest with-theme theme-name
 ```
 
-```bash
-pnpm theme-name init
-```
-
-## TODO
+## others
 
 - [ ] support js
 - [ ] support npm and yarn (only pnpm is supported now)
