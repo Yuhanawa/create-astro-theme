@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-import path, { join } from "node:path";
-import { cancel, confirm, intro, log, outro, spinner } from "@clack/prompts";
+import path from "node:path";
+import { confirm, intro, log, outro, spinner } from "@clack/prompts";
 import { cac } from "cac";
 import chalk from "chalk";
 import packageJson from "../package.json";
 import * as action from "./actions";
 import initConfig from "./actions/initConfig";
-import { kebabCase } from "./utils/case";
+import { camelCase, kebabCase } from "./utils/case";
 import { setDryRun } from "./utils/dryRun";
 import exec from "./utils/exec";
 import * as fs from "./utils/fs-wrapper";
@@ -19,86 +19,80 @@ cli.option("--dry-run", "Show what would be done, but don't actually do it");
 
 cli
 	.command("", "Create a theme with Astro Theme Provider")
-	// .option("-y, --yes", "Skip prompts and use default values")
+	.option("--new <type>", "new Project or Theme")
 	.option("--git", "Initialize a git repository")
 	.option("--install-dependencies", "Install dependencies")
 	.action(async (options) => {
-		intro("Create Astro Theme With Astro Theme Provider");
+		intro("Create a new theme");
 
-		const inProject = fs.existsSync(path.join(process.cwd(), "package.json"));
-		const hasPnpmWorkspace = fs.existsSync(path.join(process.cwd(), "pnpm-workspace.yaml"));
-		const actionType = await p.actionType(inProject);
-
-		if (!inProject && actionType === "theme") {
-			const shouldContinue = await confirm({
-				message:
-					"It looks like you're not in a project, you might want to create a `new project and theme with Astro Theme Provider`, Are you sure continue to create a theme in this directory?",
-			});
-			if (!shouldContinue) cancel();
-		}
-
+		const cwd = process.cwd();
+		const inProject = fs.existsSync(path.join(cwd, "package.json"));
 		const hasPackageOrPlayground =
-			fs.existsSync(path.join(process.cwd(), "package")) || fs.existsSync(path.join(process.cwd(), "playground"));
-		const packageIsProject = fs.existsSync(path.join(process.cwd(), "package", "package.json"));
-		const playgroundIsProject = fs.existsSync(path.join(process.cwd(), "playground", "package.json"));
+			fs.existsSync(path.join(cwd, "package")) || fs.existsSync(path.join(cwd, "playground"));
 
-		const themeName = (await p.themeName()).toString().trim().replace(/\s/g, "-");
-		const themeNameKebabCase = kebabCase(themeName);
-		const structure = await p.structure(themeNameKebabCase, {
-			inProject,
+		let actionType: string | null = null;
+		if (options.new === "project") actionType = "project";
+		else if (options.new === "theme") {
+			if (!inProject) {
+				log.error("You must be in a project to create a theme");
+				process.exit(1);
+			}
+			actionType = "theme";
+		}
+		actionType ??= !inProject ? "project" : await p.c(p.actionType());
+
+		const shouldNewProject = actionType === "project";
+
+		const project = shouldNewProject ? await p.project() : null;
+		const theme = await p.theme(project?.name, {
 			hasPackageOrPlayground,
-			packageIsProject,
-			playgroundIsProject,
 		});
-		const npm = inProject && hasPnpmWorkspace ? "pnpm" : await p.npm();
-		const initGit = (options.git ?? actionType === "project") ? await p.initGit() : false;
-		const installDependencies = options.installDependencies ?? (await p.installDependencies());
+
+		let initGit = null;
+		const installDependencies = options.installDependencies ?? (await p.c(p.installDependencies()));
+		let projectPath: string = cwd;
 
 		const s = spinner();
-		let projectPath: string;
-		if (actionType === "project") {
-			let projectName = `${themeName}-root`;
-			if (structure === "single")
-				log.info(`We will use ${projectName} as the project name and use ${themeName} as the theme name`);
-			else projectName = (await p.projectName(projectName)).toString().trim();
+		if (shouldNewProject) {
+			initGit = options.git ?? (await p.c(p.initGit()));
 
-			log.step("Initializing project...");
-			s.start("Initializing project...");
+			const projectNameKebabCase = kebabCase(project!.name);
+			projectPath = path.join(cwd, projectNameKebabCase);
 
-			const projectNameKebabCase = kebabCase(projectName);
-			action.initProject(process.cwd(), projectNameKebabCase);
-			log.success("Project initialized!");
+			s.start("Initializing...");
 
-			projectPath = path.join(process.cwd(), projectNameKebabCase);
-		} else if (actionType === "theme") {
-			projectPath = path.join(process.cwd());
+			await action.initProject(cwd, projectNameKebabCase);
+		} else s.start("Initializing...");
 
-			s.start("Initializing theme...");
-		} else throw new Error("Unknown action type"); // could not happen
-
+		const structure = theme.structure;
+		const themeNameKebabCase = kebabCase(theme.name);
 		const themeDir =
-			structure === "single" // structure === "single" only happens when actionType === "project"
+			structure === "single"
 				? "package"
 				: structure === "multi-in-subdir"
 					? themeNameKebabCase
-					: `${themeNameKebabCase}-package`;
-		const playgroundName =
+					: `package-${themeNameKebabCase}`;
+		const playgroundDir =
 			structure === "single" || structure === "single-playground"
 				? "playground"
 				: structure === "multi-in-subdir"
 					? themeNameKebabCase
-					: `${themeNameKebabCase}-playground`;
-		log.step("Initializing theme...");
-		s.message("Initializing theme...");
-		action.initTheme(projectPath, themeDir, themeName, playgroundName, npm.toString(), structure === "multi-in-subdir");
-		log.success("Theme initialized!");
+					: `playground-${themeNameKebabCase}`;
+		const playgroundName =
+			structure === "single" || structure === "single-playground" ? "playground" : `playground-${themeNameKebabCase}`;
 
-		if (initGit) action.initGit(projectPath.toString());
-		if (installDependencies) {
-			s.message("Installing dependencies...");
-			exec(`${npm.toString()} install`, { cwd: projectPath });
-			log.success("Dependencies installed!");
-		}
+		await action.initTheme(
+			projectPath,
+			themeDir,
+			theme.name,
+			playgroundDir,
+			playgroundName,
+			"pnpm",
+			structure === "multi-in-subdir",
+		);
+
+		if (initGit) await action.initGit(projectPath);
+		if (installDependencies) await action.installDependencies(projectPath);
 
 		log.info("");
 		s.stop("Initialization complete!");
@@ -107,50 +101,55 @@ cli
 
 cli
 	.command("with-theme <themeName> [websiteName]", "Create a website with your favorite theme")
-	.option("--git", "Initialize a git repository")
-	.option("--install-dependencies", "Install dependencies")
+	.option("--yes", "Skip prompts and use default values")
 	.action(async (themeName, websiteName, options) => {
 		intro("Create website with your favorite theme");
 		// biome-ignore lint:
-		websiteName ??= (await p.websiteName()).toString().trim().replace(/\s/g, "-");
+		websiteName ??= (await p.name("Website Name: ", "my-astro-website")).toString().trim().replace(/\s/g, "-");
 		const projectPath = path.join(process.cwd(), websiteName);
 		if (fs.existsAndNotEmpty(projectPath)) {
 			log.error(`Directory ${websiteName} already exists and is not empty`);
 			process.exit(1);
 		}
 
-		const git = options.git ?? (await p.initGit());
-		const installDependencies = options.installDependencies ?? (await p.installDependencies());
-		const command = [
-			"pnpm create astro@latest",
-			websiteName,
-			"--template minimal",
-			`--add ${themeName}`,
-			"--skip-houston",
-			git && "--git",
-			installDependencies && "--install",
-			"-y",
-		]
-			.filter(Boolean)
-			.join(" ");
-
 		const s = spinner();
 		s.start(`Creating website ${websiteName} with theme ${themeName} ...`);
 		log.step(`Creating website ${websiteName} with theme ${themeName} ...`);
 
-		try {
-			const code = `import { init } from "${themeName}";init();`;
-			exec(`npx tsx -e "${code}"`, { cwd: websiteName });
-		} catch (error) {
-			console.warn(error);
-		}
+		exec(`pnpm create astro@latest ${websiteName} --template minimal --skip-houston --git --no-install -y`);
 
-		exec(command);
+		fs.rmSync(path.join(projectPath, "src", "pages", "index.astro"));
+		fs.rmSync(path.join(projectPath, "src", "pages"));
+		fs.writeFileSync(
+			path.join(projectPath, "src", "env.d.ts"),
+			/*ts*/ `/// <reference path="../.astro/types.d.ts" />
+/// <reference types="astro/client" />
+/// <reference types="../.astro/.d.ts" />
+/// <reference types="../.astro/${themeName}.d.ts" />`,
+		);
+		fs.mkdirSync(path.join(projectPath, "src", "content"));
+
+		exec(`pnpm add ${themeName}`, { cwd: projectPath });
+		const importName = camelCase(themeName.replace(/^astro-?/gi, ""));
+		const astroConfigPath = path.join(projectPath, "astro.config.mjs");
+
+		fs.writeFileSync(
+			astroConfigPath,
+			/*ts*/ `// @ts-check
+import { defineConfig } from 'astro/config';
+import ${importName} from "${themeName}";
+
+// https://astro.build/config
+export default defineConfig({
+	integrations: [${importName}()],
+});`,
+		);
 
 		s.stop("Website created!");
 
 		const modulePath = path.join(projectPath, "node_modules", themeName);
 		const initConfigPath = path.join(modulePath, "init.config.json");
+
 		if (fs.existsSync(initConfigPath)) {
 			log.info(`Theme ${themeName} has "init.config.json", would you like to initialize it?`);
 			const initConfigConfirm = await confirm({
@@ -159,7 +158,7 @@ cli
 			if (initConfigConfirm) {
 				const initConfigString = fs.readFileSync(initConfigPath, "utf-8");
 				const initConfigJson = JSON.parse(initConfigString);
-				initConfig(themeName, initConfigJson, {
+				await initConfig(themeName, initConfigJson, {
 					cwd: projectPath,
 				});
 			}

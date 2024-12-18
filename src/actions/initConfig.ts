@@ -3,6 +3,17 @@ import { log, select } from "@clack/prompts";
 import * as fs from "../utils/fs-wrapper";
 import { c } from "../utils/prompts";
 
+function getAstroConfigFile(basePath: string) {
+	return [
+		"astro.config.ts",
+		"astro.config.mts",
+		"astro.config.cts",
+		"astro.config.js",
+		"astro.config.mjs",
+		"astro.config.cjs",
+	].find((file) => fs.existsSync(path.join(basePath, file)));
+}
+
 type configType =
 	| {
 			config: { file: string } | { content: string } | { jsonObject: object };
@@ -42,15 +53,7 @@ export default async function initConfig(
 		process.exit(1);
 	}
 
-	const astroConfigFiles = [
-		"astro.config.ts",
-		"astro.config.mts",
-		"astro.config.cts",
-		"astro.config.js",
-		"astro.config.mjs",
-		"astro.config.cjs",
-	];
-	const astroConfigFile = astroConfigFiles.find((file) => fs.existsSync(path.join(cwd, file)));
+	const astroConfigFile = getAstroConfigFile(cwd);
 	if (!astroConfigFile) {
 		log.error("❌ astro.config.[cjs|mts|cts|js|mjs] not found");
 		process.exit(1);
@@ -99,7 +102,6 @@ export default async function initConfig(
 							: defaultConfigsKeys[0],
 		}));
 
-	// biome-ignore lint/style/noNonNullAssertion: couldn't be null
 	const config = defaultConfigs[configKey]!.config;
 	const configString = Object.entries({
 		file: (i: string) => fs.readFileSync(i, "utf-8"),

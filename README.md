@@ -1,66 +1,23 @@
 # create-astro-theme
 
-## CLI
-
-This is a CLI tool for creating Astro theme with [Astro Theme Provider](https://github.com/astrolicious/astro-theme-provider)
+## Create new theme
 
 ```bash
-npm create astro-theme@latest
-# or
 pnpm create astro-theme@latest
-# or
-yarn create astro-theme@latest
 ```
 
-https://github.com/user-attachments/assets/a8632bd1-41d4-4fe0-8100-0d20fcf1900e
+- create new project with new theme
 
-## TODO:
+![](./docs/new-project.png)
 
-- init config
-**already implemented, but not tested**
+- create new theme in existing project
 
-init.config.json
+![](./docs/new-theme.png)
 
-```json
-{
-  "config": {
-    "object": {
-      // ...
-    }
-  }
-}
-```
 
-when user run `npm create astro-theme@latest init theme-name`
-
-the content of object in `init.config.json` will be copied to `astro.config.ts`
-
-- from zero to create website with their favorite theme
-
-> has problem: `astro-theme-provider` seems that astro v5 is not supported
-> 
-> solution:
-> 
-> - create a template using astro v4
-> 
-> - let `astro-theme-provider` support v5
-> 
+## Create new project with existing theme
 
 ```bash
-npm create astro-theme@latest with-theme theme-name
+pnpm create astro-theme@latest with-theme theme-name
 ```
 
-## others
-
-- [ ] support js
-- [ ] support npm and yarn (only pnpm is supported now)
-- [x] create package in `package/` and playground in `playground/`
-- [ ] add options
-  - [x] --dry-run
-  - [ ] -y --yes
-  - [ ] --template
-  - [ ] --theme
-  - [ ] --structure
-  - [x] --install --no-install
-  - [x] --git --no-git
-- [ ] cli example

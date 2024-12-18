@@ -17,6 +17,21 @@ export const mkdirSync = (path: string, options: fs.MakeDirectoryOptions = { rec
 	}
 };
 
+export const rmSync = (path: string, options?: fs.RmDirOptions) => {
+	if (getDryRun()) {
+		log.info(`[DryRun] remove directory: ${path}`);
+		return;
+	}
+	try {
+		fs.rmSync(path, options);
+		// biome-ignore lint/suspicious/noExplicitAny: allowed any type error
+	} catch (error: any) {
+		log.error(`❌ Failed to remove directory: ${path}`);
+		log.error(error);
+		throw error;
+	}
+};
+
 export const writeFileSync = (
 	file: fs.PathOrFileDescriptor,
 	data: string | NodeJS.ArrayBufferView,
