@@ -44,7 +44,7 @@ export function copyTemplateWithReplacements(
 
 export function createDirStructure(target: string) {
 	if (!fs.existsSync(target)) fs.mkdirSync(target);
-	const dirs = ["src", "src/components", "src/layouts", "src/styles", "src/contents", "src/pages"];
+	const dirs = ["src", "src/components", "src/layouts", "src/styles", "src/content", "src/pages"];
 
 	for (const dir of dirs) {
 		const dirPath = path.join(target, dir);
