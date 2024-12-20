@@ -105,7 +105,7 @@ cli
 	.action(async (themeName, websiteName, options) => {
 		intro("Create website with your favorite theme");
 		// biome-ignore lint:
-		websiteName ??= (await p.name("Website Name: ", "my-astro-website")).toString().trim().replace(/\s/g, "-");
+		websiteName ??= (await p.c(p.name("Website Name: ", "my-astro-website"))).toString().trim().replace(/\s/g, "-");
 		const projectPath = path.join(process.cwd(), websiteName);
 		if (fs.existsAndNotEmpty(projectPath)) {
 			log.error(`Directory ${websiteName} already exists and is not empty`);
