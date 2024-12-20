@@ -1,5 +1,16 @@
 # create-astro-theme
 
+## 0.5.0
+
+### Minor Changes
+
+- 8d1da5a: upgrade to Astro v5
+
+### Patch Changes
+
+- de12998: fix a bug on with-theme command
+- f46d500: fix: fix cancel when input website name
+
 ## 0.4.0
 
 ### Minor Changes
