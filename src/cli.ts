@@ -119,14 +119,7 @@ cli
 		exec(`pnpm create astro@latest ${websiteName} --template minimal --skip-houston --git --no-install -y`);
 
 		fs.rmSync(path.join(projectPath, "src", "pages", "index.astro"));
-		fs.rmSync(path.join(projectPath, "src", "pages"));
-		fs.writeFileSync(
-			path.join(projectPath, "src", "env.d.ts"),
-			/*ts*/ `/// <reference path="../.astro/types.d.ts" />
-/// <reference types="astro/client" />
-/// <reference types="../.astro/.d.ts" />
-/// <reference types="../.astro/${themeName}.d.ts" />`,
-		);
+		fs.writeFileSync(path.join(projectPath, "src", "env.d.ts"), `/// <reference types="../.astro/.d.ts" />`);
 		fs.mkdirSync(path.join(projectPath, "src", "content"));
 
 		exec(`pnpm add ${themeName}`, { cwd: projectPath });
