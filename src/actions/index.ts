@@ -1,6 +1,7 @@
 import { join } from "node:path";
 import { log, tasks } from "@clack/prompts";
 import * as yaml from "yaml";
+import { ATPVersion, AstroVersion } from "../const";
 import { getDryRun } from "../utils/dryRun";
 import exec from "../utils/exec";
 import { copyTemplateWithReplacements, createDirStructure } from "../utils/template";
@@ -50,7 +51,7 @@ export function initProject(BasePath: string, projectNameKebab: string) {
 					private: true,
 					scripts: {},
 					devDependencies: {
-						astro: "^4.13.1",
+						astro: AstroVersion,
 					},
 				};
 
@@ -87,6 +88,11 @@ export function initTheme(
 
 				copyTemplateWithReplacements(templatePath, themePath, {
 					themeName,
+					AstroVersion,
+					ATPVersion,
+					RelativePathBetweenPackageAndPlayground: useSubdir
+						? `../../playgrounds/${playgroundDir}/`
+						: `../${playgroundDir}/`,
 				});
 
 				// playground
@@ -104,6 +110,8 @@ export function initTheme(
 					copyTemplateWithReplacements(templatePath, playgroundPath, {
 						themeName,
 						playgroundName,
+						AstroVersion,
+						ATPVersion,
 					});
 				}
 

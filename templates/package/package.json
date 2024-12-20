@@ -1,5 +1,5 @@
 {
-  "name": "{{THEMENAMEKEBABCASE}}",
+  "name": "{{ThemeNameKebabCase}}",
   "version": "0.0.1",
   "description": "My awesome Astro theme created using `astro-theme-provider`!",
   "license": "MIT",
@@ -10,9 +10,9 @@
   ],
   "scripts": {},
   "devDependencies": {
-    "astro": "^4.13.1"
+    "astro": "{{AstroVersion}}"
   },
   "dependencies": {
-    "astro-theme-provider": "^0.6.1"
+    "astro-theme-provider": "{{ATPVersion}}"
   }
 }

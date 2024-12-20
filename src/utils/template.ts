@@ -18,7 +18,7 @@ export function copyTemplateWithReplacements(
 			const content = fs.readFileSync(src, "utf-8");
 			let replacedContent = content;
 			for (const [key, value] of Object.entries(allReplacements))
-				replacedContent = replacedContent.replace(new RegExp(`{{${key}}}`, "g"), value);
+				replacedContent = replacedContent.replace(new RegExp(`{{${key}}}`, "gi"), value);
 			fs.writeFileSync(dest, replacedContent);
 		} else fs.copyFileSync(src, dest);
 	};

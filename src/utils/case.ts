@@ -16,10 +16,9 @@ export function kebabCase(str: string) {
 export function getAllCase(str: Record<string, string>): Record<string, string> {
 	const result: Record<string, string> = {};
 	for (const [key, value] of Object.entries(str)) {
-		const upperKey = key.toUpperCase();
-		result[`${upperKey}`] = value;
-		result[`${upperKey}CAMELCASE`] = camelCase(value);
-		result[`${upperKey}KEBABCASE`] = kebabCase(value);
+		result[`${key}`] = value;
+		result[`${key}CamelCase`] = camelCase(value);
+		result[`${key}KebabCase`] = kebabCase(value);
 	}
 	return result;
 }

@@ -1,15 +1,19 @@
 ---
 import { Image } from "astro:assets";
-import { houston } from "{{THEMENAMEKEBABCASE}}:assets";
-import { Hero } from "{{THEMENAMEKEBABCASE}}:components";
-import config from "{{THEMENAMEKEBABCASE}}:config";
-import { Layout } from "{{THEMENAMEKEBABCASE}}:layouts";
+import { houston } from "{{ThemeNameKebabCase}}:assets";
+import { Hero } from "{{ThemeNameKebabCase}}:components";
+import config from "{{ThemeNameKebabCase}}:config";
+import { Layout } from "{{ThemeNameKebabCase}}:layouts";
 ---
 
 <Layout>
   <Hero title={config.title} desc={config.description} />
   <div class="houston">
-    <Image src={houston} alt="" />
+    <!-- <Image src={houston} alt="" /> -->
+     <!-- TODO: Fix it
+      I got this error:
+      [ERROR] [UnhandledRejection] Astro detected an unhandled rejection. Here's the stack trace: ShikiError: Language `(define name)` is not included in this bundle.
+     -->
   </div>
 </Layout>
 

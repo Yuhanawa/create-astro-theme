@@ -13,18 +13,18 @@ pnpm create astro@latest my-website --template minimal -y
 2. Add the theme to your project:
 
 ```sh
-pnpm astro add {{THEMENAME}}
+pnpm astro add {{ThemeName}}
 ```
 
 ### Configure
 
 ```ts
 import { defineConfig } from "astro/config";
-import {{THEMENAMECAMELCASE}}  from "{{THEMENAME}}";
+import {{ThemeNameCamelCase}}  from "{{ThemeName}}";
 
 export default defineConfig({
   integrations: [
-    {{THEMENAMECAMELCASE}}({
+    {{ThemeNameCamelCase}}({
       config: {
         title: "Hey!",
         description: "This is my website!",

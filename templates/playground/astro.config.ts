@@ -1,9 +1,9 @@
 import { defineConfig } from "astro/config";
-import {{THEMENAMECAMELCASE}} from "{{THEMENAMEKEBABCASE}}";
+import {{ThemeNameCamelCase}} from "{{ThemeNameKebabCase}}";
 
 export default defineConfig({
 	integrations: [
-		{{THEMENAMECAMELCASE}}({
+		{{ThemeNameCamelCase}}({
 			config: {
 				title: "My Awesome Theme",
 				description: "My awesome theme is currently under construction!",

@@ -1,5 +1,5 @@
 {
-  "name": "{{PLAYGROUNDNAMEKEBABCASE}}",
+  "name": "{{PlaygroundNameKebabCase}}",
   "private": true,
   "version": "0.0.1",
   "scripts": {
@@ -10,7 +10,7 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^4.13.1",
-    "{{THEMENAMEKEBABCASE}}": "workspace:^"
+    "astro": "{{AstroVersion}}",
+    "{{ThemeNameKebabCase}}": "workspace:^"
   }
 }
