@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug CLI",
+      "type": "node",
+      "request": "launch",
+      "preLaunchTask": "tsdown: build",
+      "program": "${workspaceFolder}/dist/index.js",
+      "args": [
+        "--verbose",
+        // "--dry-run"
+      ],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "cwd": "${workspaceFolder}/dist",
+      "console": "integratedTerminal"
+    }
+  ]
+}

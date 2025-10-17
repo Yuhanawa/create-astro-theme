@@ -1,0 +1,15 @@
+import { defineConfig } from "astro/config";
+import {{{pascalCase themeName}}} from "{{{kebabCase themeName}}}";
+
+export default defineConfig({
+	integrations: [
+		{{{pascalCase themeName}}}({
+			config: {
+				title: "My Awesome Theme",
+				description: "My awesome theme is currently under construction!",
+			},
+			pages: {},
+			overrides: {},
+		}),
+	],
+});

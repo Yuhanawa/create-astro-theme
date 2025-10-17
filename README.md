@@ -1,23 +1,12 @@
-# create-astro-theme
+create-astro-theme
+Create new theme
 
-## Create new theme
-
-```bash
 pnpm create astro-theme@latest
-```
 
-- create new project with new theme
+    create new project with new theme
 
-![](./docs/new-project.png)
+    create new theme in existing project
 
-- create new theme in existing project
+Create new project with existing theme
 
-![](./docs/new-theme.png)
-
-
-## Create new project with existing theme
-
-```bash
 pnpm create astro-theme@latest with-theme theme-name
-```
-

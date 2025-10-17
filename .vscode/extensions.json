@@ -1,9 +1,5 @@
 {
-    "unwantedRecommendations": [
-        "esbenp.prettier-vscode"
-    ],
     "recommendations": [
         "biomejs.biome",
-        "tobermory.es6-string-html"
     ]
 }

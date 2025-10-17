@@ -1,8 +1,0 @@
-{
-  "extends": "astro/tsconfigs/strict",
-  "include": [".astro/types.d.ts", "{{RelativePathBetweenPackageAndPlayground}}.astro/{{ThemeName}}.d.ts", "**/*"],
-  "compilerOptions": {
-    "strictNullChecks": true,
-    "allowJs": true
-  }
-}
