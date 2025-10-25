@@ -10,6 +10,10 @@ const run = async (optionalConfig: OptionalProperty<UseCommandConfig>) => {
 		...(await prompts.use.prompt(optionalConfig)),
 	};
 
+	if (config.verbose) {
+		console.log(config);
+	}
+
 	const plan = plans.use.plan(config);
 
 	try {

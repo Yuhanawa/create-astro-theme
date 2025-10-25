@@ -39,6 +39,7 @@ export type action =
 			type: "COPY_TEMPLATE_FILE";
 			file: string;
 			target: string;
+			templatePath?: string;
 			// biome-ignore lint/suspicious/noExplicitAny: suppress
 			data?: Record<string, any>;
 	  }
@@ -175,7 +176,11 @@ export const run = async (actions: actions, { dryRun, verbose }: { dryRun: boole
 				await copyTemplateDir(action.dir, action.target, action.data, { dryRun, verbose });
 				break;
 			case "COPY_TEMPLATE_FILE":
-				await copyTemplateFile(action.file, action.target, action.data, { dryRun, verbose });
+				await copyTemplateFile(action.file, action.target, action.data, {
+					dryRun,
+					verbose,
+					templatePath: action.templatePath,
+				});
 				break;
 			case "DELETE_FILE":
 				if (!dryRun) {

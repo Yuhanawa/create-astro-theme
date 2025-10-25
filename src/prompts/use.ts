@@ -68,10 +68,10 @@ const prompt = async (
 	p.log.message("It may take a while, please wait...");
 
 	const config: UseCommandConfig = {
+		...optionalConfig,
 		projectName: kebabCase(projectName),
 		themeName: themeName!,
 		themeVersion: themeVersion,
-		...optionalConfig,
 	};
 	return config;
 };
