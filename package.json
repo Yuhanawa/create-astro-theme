@@ -1,7 +1,7 @@
 {
 	"name": "create-astro-theme",
-	"version": "0.6.0",
-	"description": "A cli tool for creating or using themes using `astro-theme-provider`",
+	"version": "1.0.0",
+	"description": "A CLI tool for creating or using themes using `astro-theme-provider`",
 	"type": "module",
 	"license": "MIT",
 	"homepage": "https://github.com/Yuhanawa/create-astro-theme",
@@ -27,8 +27,8 @@
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
-			"default": "./dist/index.js",
-			"types": "./dist/index.d.ts"
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
 		},
 		"./package.json": "./package.json"
 	},
@@ -42,16 +42,19 @@
 	"scripts": {
 		"build": "tsdown",
 		"dev": "tsdown --watch",
-		"test": "vitest",
+		"test": "vitest run",
 		"check": "biome check . --write && tsc --noEmit",
 		"typecheck": "tsc --noEmit",
-		"release": "bumpp && npm publish"
+		"release": "release-it"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.2.4",
+		"@release-it/conventional-changelog": "^10.0.1",
 		"@types/fs-extra": "^11.0.4",
 		"@types/node": "^22.15.17",
+		"@vitest/coverage-v8": "3.2.4",
 		"bumpp": "^10.1.0",
+		"memfs": "^4.49.0",
 		"release-it": "^19.0.5",
 		"release-it-pnpm": "^4.6.6",
 		"tsdown": "^0.11.9",
@@ -63,6 +66,7 @@
 		"change-case": "^5.4.4",
 		"commander": "^14.0.1",
 		"fast-glob": "^3.3.3",
+		"find-up": "^8.0.0",
 		"fs-extra": "^11.3.2",
 		"handlebars": "^4.7.8",
 		"package-json": "^10.0.1",
