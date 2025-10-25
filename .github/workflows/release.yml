@@ -34,7 +34,7 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - run: pnpx changelogithub@013.16.0
+      - run: pnpx changelogithub@13.16.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
