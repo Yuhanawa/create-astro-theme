@@ -1,6 +1,6 @@
 {
 	"name": "create-astro-theme",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"description": "A CLI tool for creating or using themes using `astro-theme-provider`",
 	"type": "module",
 	"license": "MIT",
