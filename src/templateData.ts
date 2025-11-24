@@ -1,5 +1,5 @@
 export const versions = {
-	astro: "5.14.1",
+	astro: "5.16.0",
 	astroThemeProvider: "0.7.1",
 };
 
